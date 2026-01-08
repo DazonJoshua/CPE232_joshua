@@ -1,0 +1,6 @@
+- name: Web Server setup (Instal + Creation)
+  hosts: web_servers
+  gather_facts: yes
+
+
+  name: Install
