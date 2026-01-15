@@ -1,16 +1,27 @@
-- name: Install_ apache package
-  hosts: web_servers
-  gather_facts: yes
-
+---
+- hosts: all
+  become: true 
   tasks:
-  - name: update repo index
-    apt:
+
+  - name: update repository index
+    package:
       update_cache: yes
+    when: ansible_distribution == "Ubuntu"
 
-  - name: Install apache2 package
-    apt:
-      name: apache2
+  - name: install apache2 and php packages for Ubuntu
+    package:
+      name: 
+       - "{{ apache_package }}"
+       - "{{ php_package }}"
+      state: latest
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
 
-  - name: add PHP support for apache
-    apt: 
-      name: libapache2-mod-php 
+  - name: install apache2 package and php packages for CentOS
+    dnf:
+      name: 
+      - httpd
+      - php
+      state: latest
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
