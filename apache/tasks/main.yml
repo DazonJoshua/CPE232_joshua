@@ -1,0 +1,9 @@
+---
+# tasks file for apache
+
+  - name: Install apache (system-level)
+    ansible.builtin.apt:
+      name: apache2
+      state: present
+    become: yes
+    
