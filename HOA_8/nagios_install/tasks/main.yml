@@ -1,0 +1,51 @@
+---
+# tasks file for nagios_install
+
+- name: Create nagios user
+  user:
+    name: nagios
+    state: present
+
+- name: Create nagcmd group
+  group:
+    name: nagcmd
+    state: present
+
+- name: Add users to nagcmd group
+  user:
+    name: "{{ item }}"
+    groups: nagcmd
+    append: yes
+  loop:
+    - nagios
+    - "{{ 'www-data' if ansible_os_family == 'Debian' else 'apache' }}"
+
+- name: Run configure script
+  command: "./configure --with-command-group=nagcmd"
+  args:
+    chdir: "/tmp/nagios-4.4.6"
+
+- name: Compile Nagios source
+  command: make all
+  args:
+    chdir: "/tmp/nagios-4.4.6"
+
+- name: Install Nagios binaries and scripts
+  command: "{{ item }}"
+  args:
+    chdir: "/tmp/nagios-4.4.6"
+  loop:
+    - make install
+    - make install-init
+    - make install-commandmode
+    - make install-config
+    - make install-webconf
+
+- name: Start and enable Nagios and Web Server
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - nagios
+    - "{{ 'apache2' if ansible_os_family == 'Debian' else 'httpd' }}"
